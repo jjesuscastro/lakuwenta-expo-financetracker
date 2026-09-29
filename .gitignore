@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+.expo/
+dist/
+apps/api/dist/
+apps/api/data/
+apps/mobile/web-build/
+*.md
+*.pdf

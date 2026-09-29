@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "LaKuwenta",
+    "slug": "lakuenta",
+    "scheme": "lakuenta",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true },
+    "android": { "package": "app.lakuenta.mobile" },
+    "web": { "bundler": "metro" }
+  }
+}

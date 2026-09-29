@@ -1,0 +1,53 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS goals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  target_amount_cents INTEGER NOT NULL CHECK (target_amount_cents > 0),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS debts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('OWED_BY_ME', 'OWED_TO_ME')),
+  starting_amount_cents INTEGER NOT NULL CHECK (starting_amount_cents > 0),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('EXPENSE', 'GOAL_CONTRIBUTION', 'DEBT_PAYMENT', 'DEBT_COLLECTION')),
+  name TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL CHECK (amount_cents > 0),
+  transaction_date TEXT NOT NULL,
+  category_id INTEGER REFERENCES categories(id) ON DELETE RESTRICT,
+  goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
+  debt_id INTEGER REFERENCES debts(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CHECK ((type = 'EXPENSE' AND category_id IS NOT NULL AND goal_id IS NULL AND debt_id IS NULL)
+      OR (type = 'GOAL_CONTRIBUTION' AND category_id IS NULL AND goal_id IS NOT NULL AND debt_id IS NULL)
+      OR (type IN ('DEBT_PAYMENT', 'DEBT_COLLECTION') AND category_id IS NULL AND goal_id IS NULL AND debt_id IS NOT NULL))
+);
+
+CREATE INDEX IF NOT EXISTS transactions_user_date_idx ON transactions(user_id, transaction_date);
+CREATE INDEX IF NOT EXISTS transactions_category_idx ON transactions(category_id);
