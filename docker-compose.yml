@@ -1,0 +1,44 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_PATH: /data/lakuenta.sqlite
+      ENV_FILE: /dev/null
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the Portainer stack environment}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in the Portainer stack environment}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in the Portainer stack environment}
+    volumes:
+      - lakuenta_data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+      args:
+        EXPO_PUBLIC_API_URL: /api
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8084}:80"
+
+volumes:
+  lakuenta_data:

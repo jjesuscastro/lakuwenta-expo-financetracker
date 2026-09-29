@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+node_modules
+**/node_modules
+.expo
+**/.expo
+dist
+**/dist
+apps/api/data
+**/data
+*.pdf
