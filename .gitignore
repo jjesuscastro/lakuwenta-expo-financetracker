@@ -9,3 +9,4 @@ apps/api/data/
 apps/mobile/web-build/
 *.md
 *.pdf
+apps/mobile/android/app/debug.keystore

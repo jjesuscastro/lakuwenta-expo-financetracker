@@ -78,7 +78,7 @@ export default function App() {
   const styles = useMemo(() => createStyles(darkMode), [darkMode]);
 
   const api = useCallback(async (path: string, init: RequestInit = {}) => {
-    const response = await fetch(`${API}${path}`, { ...init, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers } });
+    const response = await fetch(`${API}${path}`, { ...init, headers: { ...(init.body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers } });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
       throw new Error(data.error || `Request failed (${response.status})`);
